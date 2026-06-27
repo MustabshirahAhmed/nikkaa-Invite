@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lily & Sunny’s Love Story — Journal Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Quicksand:wght@400;600&family=Reenie+Beanie&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --notebook-bench: #EFECE1;
+            --parchment-base: #FCF9F2;
+            --vintage-ink: #2F3E35;
+            --muted-rose: #C68B8B;
+            --active-bride: #B37171;
+            --muted-teal: #7A9E9F;
+            --active-groom: #547879;
+            --journal-shadow: 0 25px 55px rgba(50, 40, 30, 0.2);
+            
+            --accent-dynamic: var(--muted-rose);
+            --transition-page: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--notebook-bench);
+            background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 0);
+            background-size: 24px 24px;
+            color: var(--vintage-ink);
+            font-family: 'Quicksand', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1500px;
+            padding: 1rem;
+        }
+
+        .journal-book {
+            width: 100%;
+            max-width: 650px;
+            height: 85vh;
+            min-height: 580px;
+            max-height: 750px;
+            background: var(--parchment-base);
+            border-radius: 4px 16px 16px 4px;
+            box-shadow: var(--journal-shadow);
+            position: relative;
+            border-left: 22px solid #4A3B32;
+        }
+
+        .journal-book::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 99;
+            border-radius: inherit;
+        }
+
+        /* --- Leaf Core Engine --- */
+        .paper-leaf {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--parchment-base);
+            padding: 2.5rem 2.5rem 3.5rem 2.5rem;
+            box-shadow: inset 30px 0 50px rgba(0,0,0,0.02);
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform var(--transition-page), z-index 0s, opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Stack Priority Management */
+        .paper-leaf.active-leaf {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 50;
+            transform: rotateY(0deg);
+        }
+
+        .paper-leaf.flipped-past {
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transform: rotateY(-140deg) scaleX(0.95);
+        }
+
+        /* --- Botanical Assets --- */
+        .botanical-bg-frame {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.18;
+        }
+        .botanical-art { fill: none; stroke: var(--vintage-ink); stroke-width: 1.2px; stroke-linecap: round; }
+
+        .leaf-interior-content {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* --- Book Navigation Footers --- */
+        .nav-footer-row {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 2.5rem;
+            right: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .nav-leaf-btn {
+            background: none; border: none;
+            font-family: 'Reenie Beanie', cursive;
+            font-size: 1.8rem; cursor: pointer;
+            color: #776A5F; transition: color 0.2s, transform 0.2s;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .nav-leaf-btn:hover { color: var(--accent-dynamic); transform: scale(1.05); }
+
+        /* --- UI Elements --- */
+        .journal-tag { font-family: 'Reenie Beanie', cursive; font-size: 2.2rem; color: var(--muted-rose); margin-bottom: 0.5rem; display: block; }
+        h1.book-title { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 3.4rem); font-style: italic; font-weight: 700; line-height: 1.2; margin-bottom: 1rem; }
+        .handwritten-sub { font-family: 'Reenie Beanie', cursive; font-size: 1.8rem; color: #555; max-width: 400px; margin: 0 auto 2.5rem auto; }
+
+        .scrapbook-polaroids { display: flex; justify-content: center; gap: 1.8rem; }
+        .polaroid-card { background: #FFF; padding: 0.8rem 0.8rem 2rem 0.8rem; box-shadow: 0 8px 20px rgba(0,0,0,0.05); transform: rotate(-3deg); cursor: pointer; transition: transform 0.4s ease; width: 170px; }
+        .polaroid-card:nth-child(2) { transform: rotate(4deg); }
+        .polaroid-card:hover { transform: scale(1.05) rotate(0deg); }
+        .polaroid-img { width: 100%; height: 140px; background-size: cover; background-position: center; filter: sepia(0.2) contrast(0.9); margin-bottom: 0.8rem; }
+        .bride-polaroid .polaroid-img { background-color: #F5E6E8; background-image: url('motiaInvite.jpeg'); }
+        .groom-polaroid .polaroid-img { background-color: #E6EEF0; background-image: url('sarimInvite.jpeg'); }
+        .tape-label { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: bold; }
+        .bride-polaroid .tape-label { color: var(--muted-rose); }
+        .groom-polaroid .tape-label { color: var(--muted-teal); }
+
+        .entry-date { font-family: 'Reenie Beanie', cursive; font-size: 2rem; color: #776A5F; display: block; margin-bottom: 0.5rem; text-align: left; }
+        .entry-heading { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic; text-align: left; }
+        .diary-text { font-size: 1.05rem; line-height: 1.7; color: #4A4A4A; margin-bottom: 1.5rem; text-align: left; }
+
+        /* --- Latency-Free Map Alternative --- */
+        .static-sketch-map {
+            width: 100%; height: 210px;
+            background: #EAE6DF;
+            border: 6px solid #FFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            border-radius: 2px; margin-bottom: 1.2rem;
+            position: relative; overflow: hidden;
+        }
+        .static-sketch-map::before {
+            content: "🗺️"; font-size: 3rem; opacity: 0.3; margin-bottom: 0.5rem;
+        }
+        .map-launch-btn {
+            background: var(--vintage-ink); color: #FFF; border: none;
+            padding: 0.6rem 1.2rem; font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; border-radius: 4px;
+            cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* --- Form Elements --- */
+        .journal-form { display: flex; flex-direction: column; gap: 0.8rem; text-align: left; }
+        .form-row { display: flex; flex-direction: column; gap: 0.2rem; }
+        .form-row label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #666; }
+        .journal-input { width: 100%; padding: 0.4rem 0.2rem; border: none; border-bottom: 2px dashed #C3BEB5; background: transparent; font-size: 1rem; font-family: inherit; color: var(--vintage-ink); outline: none; }
+        .vintage-select { padding: 0.5rem; border: 1px solid #C3BEB5; border-radius: 4px; background: #FFF; font-size: 0.9rem; color: var(--vintage-ink); outline: none; }
+        .choice-deck { display: flex; gap: 1rem; }
+        .choice-stick { flex: 1; padding: 0.7rem; text-align: center; border: 1px solid #C3BEB5; background: #FFF; font-weight: 600; cursor: pointer; border-radius: 4px; font-size: 0.9rem; }
+        .choice-stick.selected-accept { background: #E2ECE9; border-color: #7A9E9F; color: #2E4A4B; }
+        .choice-stick.selected-pass { background: #F7EBEB; border-color: #C68B8B; color: #613434; }
+        .ink-submit-btn { background: var(--vintage-ink); color: #FFF; border: none; padding: 0.9rem; font-family: 'Playfair Display', serif; font-size: 1.1rem; cursor: pointer; border-radius: 4px; margin-top: 0.3rem; }
+
+        /* Final Paper Elements */
+        .stamp-mark { font-size: 4rem; margin-bottom: 1rem; display: block; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        body.bride-theme { --accent-dynamic: var(--active-bride); }
+        body.groom-theme { --accent-dynamic: var(--active-groom); }
+
+        @media (max-width: 600px) {
+            .journal-book { border-left: none; border-top: 15px solid #4A3B32; height: 92vh; }
+            .paper-leaf { padding: 1.5rem 1.2rem 3rem 1.2rem; }
+            .nav-footer-row { left: 1.2rem; right: 1.2rem; bottom: 0.8rem; }
+            .polaroid-card { width: 135px; }
+            .polaroid-img { height: 105px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="journal-book" id="invitationJournal">
+        
+        <div class="paper-leaf active-leaf" id="leaf-1">
+            <svg class="botanical-bg-frame" viewBox="0 0 600 700">
+                <path class="botanical-art" d="M -10,100 C 60,150 40,250 10,320 M 620,80 C 540,110 480,50 410,-10" />
+            </svg>
+            <div class="leaf-interior-content">
+                <span class="journal-tag">New Chapter Entry: July 2026</span>
+                <h1 class="book-title">The Nikaah Chapter <br>of Motia & Sarim</h1>
+                <p class="handwritten-sub">A hand-pressed visual account of our start of happily ever after.</p>
+                
+                <div class="scrapbook-polaroids">
+                    <div class="polaroid-card bride-polaroid" onclick="setThemeAndGoForward('bride')">
+                        <div class="polaroid-img"></div>
+                        <div class="tape-label">Mustabshirah's Account</div>
+                    </div>
+                    <div class="polaroid-card groom-polaroid" onclick="setThemeAndGoForward('groom')">
+                        <div class="polaroid-img"></div>
+                        <div class="tape-label">Sarim's<br> Account</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="paper-leaf" id="leaf-2">
+            <svg class="botanical-bg-frame" viewBox="0 0 600 700">
+                <path class="botanical-art" d="M 120,710 C 160,640 280,660 380,720 M -5,220 C 35,230 40,280 15,310" />
+            </svg>
+            <div class="leaf-interior-content">
+                <span class="entry-date"><strong>July 12th, After Asr prayer —</strong></span>
+                <p class="diary-text">Beneath the serene arches of a mosque, a sacred journey begins—two hearts united in faith, love, and divine blessing. Soft prayers of “Ameen” fill the air as family and friends gather, wrapping the moment in warmth, gratitude, and hope.
+                    <br><br>This is the beautiful opening of a new chapter, blessed with barakah, guided by mercy, and carried forward with prayers for peace, love, and a lifelong togetherness.  </p>
+                <p style="font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: bold; color: var(--accent-dynamic); text-align: left;">
+                    ⏱️ Asr Prayer at 4:15 PM Sharp.
+                </p>
+            </div>
+            <div class="nav-footer-row">
+                <button class="nav-leaf-btn" onclick="goBackToLeaf(1)">↩ Back Cover</button>
+                <button class="nav-leaf-btn" onclick="goForwardToLeaf(3)">Coordinates ➔</button>
+            </div>
+        </div>
+
+        <div class="paper-leaf" id="leaf-3">
+            <svg class="botanical-bg-frame" viewBox="0 0 600 700">
+                <path class="botanical-art" d="M 520,600 C 450,550 420,630 480,680" />
+            </svg>
+            <div class="leaf-interior-content">
+                <span class="entry-date">The Co-ordinates —</span>
+                <h2 class="entry-heading">Masjid Abdullah Ahle Hadees</h2>
+                <p class="diary-text" style="color: #666; margin-bottom: 0.8rem;">
+                    Plot 74 G1, Block-6, P.E.C.H.S., Karachi, 74400, Pakistan
+                </p>
+                
+                <div class="static-sketch-map">
+                    <p style="font-family:'Playfair Display', serif; font-style:italic; font-size:1.1rem; color:#554E45; margin-bottom:1rem;">P.E.C.H.S Karachi Block 6</p>
+                    <a href="https://maps.app.goo.gl/9yGv4wL9pUv2qDqG8" target="_blank" class="map-launch-btn">Open Interactive Map ↗</a>
+                </div>
+            </div>
+            <div class="nav-footer-row">
+                <button class="nav-leaf-btn" onclick="goBackToLeaf(2)">↩ Blueprint</button>
+                <button class="nav-leaf-btn" onclick="goForwardToLeaf(4)">Register ➔</button>
+            </div>
+        </div>
+
+        <div class="paper-leaf" id="leaf-4">
+            <svg class="botanical-bg-frame" viewBox="0 0 600 700">
+                <path class="botanical-art" d="M -10,500 C 50,520 80,480 30,420" />
+            </svg>
+            <div class="leaf-interior-content">
+                <span class="entry-date">Sign the Guest Register —</span>
+                <h2 class="entry-heading" style="margin-bottom: 0.8rem;">Kindly Respond</h2>
+                
+                <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="handleJournalFormSubmit()"></iframe>
+                
+                <form class="journal-form" action="https://docs.google.com/forms/d/e/1FAIpQLSdnJ26nPaU5ELyVbLF3Hgs98UkHj_fIEb3jF5Nry6kC5wK7ag/formResponse" method="POST" target="hidden_iframe" onsubmit="formSubmitActive = true;">
+                    
+                    <input type="hidden" name="entry.57257542" id="journal-team" value="Unassigned">
+                    <input type="hidden" name="entry.1873200604" id="journal-attendance" value="Unset">
+
+                    <div class="form-row">
+                        <label>Guest Full Name</label>
+                        <input type="text" class="journal-input" name="entry.1597045551" placeholder="Write here..." required>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Head Count Intended</label>
+                        <select class="vintage-select" id="journal-count" name="entry.1162433031" required>
+                            <option value="" disabled selected>Specify number...</option>
+                            <option value="1">Solo (1)</option>
+                            <option value="2">Coupled (2)</option>
+                            <option value="3">Three (3)</option>
+                            <option value="4">Four (4)</option>
+                            <option value="5+">Five or more (5+)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label>A Pressed Note / Warm Wish</label>
+                        <input type="text" class="journal-input" name="entry.303972581" placeholder="Pen down a sentence..." required>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Your Status</label>
+                        <div class="choice-deck">
+                            <div class="choice-stick" id="btn-accept" onclick="toggleAttendanceSelection('Accept')">Attending 🌸</div>
+                            <div class="choice-stick" id="btn-pass" onclick="toggleAttendanceSelection('I\'ll Pass')">Declining 🍂</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="ink-submit-btn">Close Entry & Seal Letter ✉️</button>
+                </form>
+            </div>
+            <div class="nav-footer-row">
+                <button class="nav-leaf-btn" onclick="goBackToLeaf(3)">↩ Map</button>
+            </div>
+        </div>
+
+        <div class="paper-leaf" id="leaf-5">
+            <svg class="botanical-bg-frame" viewBox="0 0 600 700">
+                <path class="botanical-art" d="M 300,100 C 350,200 250,300 400,400" />
+            </svg>
+            <div class="leaf-interior-content" style="padding: 2rem 1rem;">
+                <span class="stamp-mark" id="final-stamp">🌸</span>
+                <h2 class="entry-heading" style="text-align: center; font-size: 2.2rem; margin-bottom: 1.5rem;">Notebook Sealed</h2>
+                <p id="conditional-family-msg" style="font-family: 'Playfair Display', serif; font-size: 1.4rem; font-style: italic; line-height: 1.6; color: var(--vintage-ink);">
+                    </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let formSubmitActive = false;
+        let selectedStatus = "Unset";
+
+        function setThemeAndGoForward(selectedParty) {
+            const teamInput = document.getElementById('journal-team');
+            if (selectedParty === 'bride') {
+                document.body.className = "bride-theme";
+                teamInput.value = "Team Bride";
+            } else {
+                document.body.className = "groom-theme";
+                teamInput.value = "Team Groom";
+            }
+            goForwardToLeaf(2);
+        }
+
+        function goForwardToLeaf(targetLeafNum) {
+            const currentLeaf = document.querySelector('.active-leaf');
+            if (currentLeaf) {
+                currentLeaf.classList.remove('active-leaf');
+                currentLeaf.classList.add('flipped-past');
+            }
+            const nextLeaf = document.getElementById(`leaf-${targetLeafNum}`);
+            nextLeaf.classList.add('active-leaf');
+            nextLeaf.classList.remove('flipped-past');
+        }
+
+        function goBackToLeaf(targetLeafNum) {
+            const currentLeaf = document.querySelector('.active-leaf');
+            if (currentLeaf) {
+                currentLeaf.classList.remove('active-leaf');
+            }
+            const prevLeaf = document.getElementById(`leaf-${targetLeafNum}`);
+            prevLeaf.classList.add('active-leaf');
+            prevLeaf.classList.remove('flipped-past');
+        }
+
+        function toggleAttendanceSelection(status) {
+            selectedStatus = status;
+            document.getElementById('journal-attendance').value = status;
+            const acceptBtn = document.getElementById('btn-accept');
+            const passBtn = document.getElementById('btn-pass');
+            const counter = document.getElementById('journal-count');
+
+            if(status === 'Accept') {
+                acceptBtn.classList.add('selected-accept');
+                passBtn.classList.remove('selected-pass');
+                
+                // Reset select field configurations
+                counter.style.opacity = "1";
+                counter.style.pointerEvents = "auto";
+                counter.required = true;
+                if(counter.value === "0") counter.value = "";
+            } else {
+                passBtn.classList.add('selected-pass');
+                acceptBtn.classList.remove('selected-accept');
+                
+                // Hide or fade selection safely without breaking data validation
+                counter.value = "1"; // Send a placeholder value since they are declining anyway
+                counter.required = false;
+                counter.style.opacity = "0.5";
+                counter.style.pointerEvents = "none";
+            }
+        }
+
+        function handleJournalFormSubmit() {
+            if(formSubmitActive) {
+                // Build customized conditional family text message output
+                const messageTarget = document.getElementById('conditional-family-msg');
+                const stampTarget = document.getElementById('final-stamp');
+                
+                if (selectedStatus === 'Accept') {
+                    messageTarget.innerText = "“The family will be waiting for you.”";
+                    stampTarget.innerText = "🌸";
+                } else {
+                    messageTarget.innerText = "“We would love your company, please try to come if possible.”";
+                    stampTarget.innerText = "🍂";
+                }
+                
+                // Route to final visual leaf page
+                goForwardToLeaf(5);
+            }
+        }
+    </script>
+</body>
+</html>
